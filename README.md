@@ -29,7 +29,7 @@ composer require curly-deni/laravel-permission-model-attributes
 Publish the config file:
 
 ```bash
-php artisan vendor:publish --tag="laravel-permission-model-attributes-config"
+php artisan vendor:publish --tag="permission-model-attributes-config"
 ```
 
 ---

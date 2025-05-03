@@ -1,10 +1,15 @@
 {
     "name": "curly-deni/laravel-permission-model-attributes",
-    "description": "This is my package laravel-permission-model-attributes",
+    "description": "Add permission-aware attributes and static checks to Eloquent models using Laravel's authorization policies.",
     "keywords": [
-        "Danila Mikhalev",
         "laravel",
-        "laravel-permission-model-attributes"
+        "eloquent",
+        "authorization",
+        "permissions",
+        "model",
+        "policy",
+        "attributes",
+        "access control"
     ],
     "homepage": "https://github.com/curly-deni/laravel-permission-model-attributes",
     "license": "MIT",

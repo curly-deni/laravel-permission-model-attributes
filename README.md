@@ -1,84 +1,160 @@
-# This is my package laravel-permission-model-attributes
+# Laravel Permission Model Attributes
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/curly-deni/laravel-permission-model-attributes.svg?style=flat-square)](https://packagist.org/packages/curly-deni/laravel-permission-model-attributes)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/curly-deni/laravel-permission-model-attributes/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/curly-deni/laravel-permission-model-attributes/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/curly-deni/laravel-permission-model-attributes/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/curly-deni/laravel-permission-model-attributes/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
+[![Code Style](https://img.shields.io/github/actions/workflow/status/curly-deni/laravel-permission-model-attributes/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/curly-deni/laravel-permission-model-attributes/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/curly-deni/laravel-permission-model-attributes.svg?style=flat-square)](https://packagist.org/packages/curly-deni/laravel-permission-model-attributes)
 
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+**Laravel Permission Model Attributes** adds permission-aware properties to your Eloquent models using native Laravel authorization. It provides a convenient way to check and expose model-level permissions through dynamic attributes like `updatable` and `deletable`, based on policies or internal rules.
 
-## Support us
+---
 
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/laravel-permission-model-attributes.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/laravel-permission-model-attributes)
+## ✨ Features
 
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
+- ✅ Adds `updatable` and `deletable` model attributes
+- 🧠 Static permission checks: `create`, `read`, `update`, `delete`
+- 🔐 Seamless integration with Laravel’s native authorization system (policies)
+- ⚡ Attribute caching for performance
+- 🧩 Optional interface for strict typing
 
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
+---
 
-## Installation
+## 📦 Installation
 
-You can install the package via composer:
+Install via Composer:
 
 ```bash
 composer require curly-deni/laravel-permission-model-attributes
-```
+````
 
-You can publish and run the migrations with:
-
-```bash
-php artisan vendor:publish --tag="laravel-permission-model-attributes-migrations"
-php artisan migrate
-```
-
-You can publish the config file with:
+Publish the config file:
 
 ```bash
 php artisan vendor:publish --tag="laravel-permission-model-attributes-config"
 ```
 
-This is the contents of the published config file:
+---
+
+## ⚙️ Configuration
 
 ```php
 return [
+    'create' => true,
+    'update' => true,
+    'delete' => true,
+    'read' => false,
 ];
 ```
 
-Optionally, you can publish the views using
+Each flag enables permission checks for the corresponding action:
 
-```bash
-php artisan vendor:publish --tag="laravel-permission-model-attributes-views"
-```
+| Key    | Description                                           |
+| ------ | ----------------------------------------------------- |
+| create | Enables permission check via `create()` policy method |
+| read   | Enables permission check via `read()` policy method   |
+| update | Enables permission check via `update()` policy method |
+| delete | Enables permission check via `delete()` policy method |
 
-## Usage
+> ✅ Only the enabled actions will be checked. If disabled, permission checks are skipped entirely.
+
+---
+
+## 🛡 Policy Integration
+
+The package automatically uses Laravel’s policy system. You must define policy methods **only for the enabled actions**.
+
+### ✏ Define Policy Methods
 
 ```php
-$permissionModelAttributes = new Aesis\PermissionModelAttributes();
-echo $permissionModelAttributes->echoPhrase('Hello, Aesis!');
+class PostPolicy
+{
+    public function create(User $user)
+    {
+        return $user->hasPermission('create-posts');
+    }
+
+    public function update(User $user, Post $post)
+    {
+        return $user->id === $post->user_id;
+    }
+
+    public function delete(User $user, Post $post)
+    {
+        return $user->id === $post->user_id;
+    }
+
+    public function read(User $user)
+    {
+        return $user->hasPermission('read-posts');
+    }
+}
 ```
 
-## Testing
+> ⚠️ **Note:** The `read()` method accepts only the `User` object — **no model instance is passed**.
 
-```bash
-composer test
+---
+
+## 🚀 Usage
+
+### 1. Add the Trait
+
+```php
+use Aesis\PermissionModelAttributes\Traits\HasPermissionAttributes;
+
+class Post extends Model
+{
+    use HasPermissionAttributes;
+}
 ```
 
-## Changelog
+### 2. (Optional) Implement the Interface
 
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
+```php
+use Aesis\PermissionModelAttributes\Contracts\PermissionAttributes;
 
-## Contributing
+class Post extends Model implements PermissionAttributes
+{
+    use HasPermissionAttributes;
+}
+```
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+### 3. Access in Code
 
-## Security Vulnerabilities
+```php
+$post = Post::find(1);
 
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
+if ($post->updatable) {
+    // show edit button
+}
 
-## Credits
+if (Post::isCreatableStatic()) {
+    // show "New" button
+}
+```
 
-- [Danila Mikhalev](https://github.com/curly-deni)
-- [All Contributors](../../contributors)
+---
 
-## License
+## 📘 Trait Reference
 
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+| Method / Attribute    | Type             | Description                                  |
+| --------------------- | ---------------- | -------------------------------------------- |
+| `updatable`           | Attribute (bool) | Returns `true` if the model can be updated   |
+| `deletable`           | Attribute (bool) | Returns `true` if the model can be deleted   |
+| `isUpdatable()`       | Method           | Instance-level permission check for `update` |
+| `isDeletable()`       | Method           | Instance-level permission check for `delete` |
+| `isCreatableStatic()` | Static           | Class-level permission check for `create`    |
+| `isReadableStatic()`  | Static           | Class-level permission check for `read`      |
+| `isUpdatableStatic()` | Static           | Class-level permission check for `update`    |
+| `isDeletableStatic()` | Static           | Class-level permission check for `delete`    |
+
+---
+
+## 👤 Author
+
+* [Danila Mikhalev](https://github.com/curly-deni)
+
+---
+
+## 📝 License
+
+This package is open-sourced software licensed under the [MIT license](LICENSE.md).
+
